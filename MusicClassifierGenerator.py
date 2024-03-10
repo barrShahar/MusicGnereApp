@@ -40,7 +40,7 @@ svm_param_grid = {
 # }
 
 class MusicClassifierGenerator:
-    def __init__(self):
+    def __init__(self, set_default_classifier=False):
         self.file_suffix = None
         self.param_grid = None
         self.pipeline = None
@@ -54,6 +54,8 @@ class MusicClassifierGenerator:
         self.sorted_file_names_column = None
         self.X = None
         self.data = Data(GlobalVariables.dataset_path)
+        if set_default_classifier:
+            self.set_default_classifier()
 
     def set_features_params(self, max_feature_num: int, pairwise_correlation_thresholds: float):
         self.feature_names_list, feature_count = self.data.get_feature_names_list(max_feature_num,
@@ -135,7 +137,7 @@ class MusicClassifierGenerator:
         # Assuming 'classes' is a list of class labels
         for i, class_label in enumerate(calibrated_svm.classes_):
             class_probability = probabilities[0][i]
-            s += f"Probability of {class_label}: {class_probability:.3f}\n"
+            s += f"\tProbability of {class_label}: {class_probability:.3f}\n"
             print(f"Probability of {class_label}: {class_probability:.3f}")
         return s
 

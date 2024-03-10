@@ -2,6 +2,49 @@ import librosa
 import numpy as np
 import pandas as pd
 import GlobalVariables
+import sounddevice as sd
+
+
+def play_audio(audio):
+    sd.play(audio, samplerate=GlobalVariables.SAMPLING_RATE)
+    sd.wait()
+
+
+def record_audio():
+    """
+    Function to record audio using the sounddevice library.
+
+    :return: Recorded audio data as a numpy array and its sampling rate.
+    """
+    # Query available input devices
+    devices = sd.query_devices()
+
+    # Find the first input device
+    input_device_id = None
+    for i, device in enumerate(devices):
+        if device['max_input_channels'] > 0:
+            input_device_id = i
+            break
+
+    if input_device_id is None:
+        raise ValueError("No input devices found.")
+
+    # Record audio for a specific duration at a given sample rate and number of channels
+    audio = sd.rec(int(GlobalVariables.SAMPLING_RATE * GlobalVariables.DURATION),
+                   samplerate=GlobalVariables.SAMPLING_RATE, channels=device['max_input_channels'],
+                   dtype='float32', device=input_device_id)
+
+    # Wait for the recording to finish
+    sd.wait()
+
+    # Normalize audio data to the range [-1.0, 1.0]
+    audio /= np.max(np.abs(audio))
+
+    # Get the sampling rate
+    sampling_rate = GlobalVariables.SAMPLING_RATE
+
+    # Return the recorded audio data and its sampling rate
+    return audio, sampling_rate
 
 
 def extract_middle(y, sr=GlobalVariables.SAMPLING_RATE, duration=GlobalVariables.DURATION):
