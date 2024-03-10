@@ -1,7 +1,7 @@
 # Configuration variables:
 
 # Flag to control plotting
-g_plot = True
+g_plot = False
 dataset_path = "./csv/data3.csv"
 
 gtzan_genres = [
