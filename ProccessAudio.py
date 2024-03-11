@@ -115,6 +115,7 @@ def extract_middle(y, sr=GlobalVariables.SAMPLING_RATE, duration=GlobalVariables
 
 def extract_features_from_audio(y, song_file_name="Unknown", sr=GlobalVariables.SAMPLING_RATE):
     # Compute features
+    print(y.shape)
     chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
     rms = librosa.feature.rms(y=y)
     spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)

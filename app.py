@@ -10,6 +10,7 @@ import pandas as pd
 import ProccessAudio
 import GlobalVariables
 from MusicClassifierGenerator import MusicClassifierGenerator
+import time
 
 
 class CircularButtonThread(QPushButton):
@@ -21,31 +22,15 @@ class CircularButtonThread(QPushButton):
         self.setFont(QFont("Arial", 15, QFont.Bold))  # Set font weight to bold
 
 
-# class RecordingThread(QThread):
-#     def __init__(self, loaded_audio, text_output, parent=None):
-#         super().__init__(parent)
-#         self.text_output = text_output
-#         self.loaded_audio = loaded_audio
-#
-#     def run(self):
-#         self.text_output.append("Recording...")
-#         audio = ProccessAudio.record_audio()
-#         self.loaded_audio = audio
-#         self.text_output.append("Done recording")
-
-
-class BarProgressThread(QThread):
-    def __init__(self, recording_timer):
-        super().__init__()
-        self.recording_timer = recording_timer
+class RecordThread(QThread):
+    finished = pyqtSignal(object)
 
     def run(self):
-        pass
-        # self.progress_bar.setValue(0)  # Reset progress bar
-        self.recording_timer.start(300)  # Start timer with interval of 1 second (1000 milliseconds)
+        audio, _ = ProccessAudio.record_audio()
+        self.finished.emit(audio)
 
 
-class PredictGenreButton(QThread):
+class PredictGenreThread(QThread):
     processing_complete = pyqtSignal(str)
 
     def __init__(self, loaded_audio, music_classifier):
@@ -59,7 +44,6 @@ class PredictGenreButton(QThread):
         y_pred = self.music_classifier.predict_given_all_features(features)
         result_text = f"Predicted {y_pred}"
         self.processing_complete.emit(result_text)
-
 
 class AudioProcessingApp(QMainWindow):
     def __init__(self):
@@ -114,6 +98,27 @@ class AudioProcessingApp(QMainWindow):
         self.music_classifier = MusicClassifierGenerator(set_default_classifier=True)
         # self.music_classifier.set_default_classifier()
 
+        # self.progress_thread = ProgressThread(30)  # Duration in seconds
+        # self.progress_thread.progress_update.connect(self.update_progress)
+
+        self.recording_thread = RecordThread()
+        self.recording_thread.finished.connect(self.on_recording_finished)
+        self.recording_timer = QTimer()
+        self.recording_timer.timeout.connect(self.update_progress)
+
+    def start_recording(self):
+        self.progress_bar.setValue(0)  # Reset progress bar
+        self.recording_timer.start(300)  # Start the timer to update progress bar every second
+        self.recording_thread.start()
+        self.text_output.append("Recording..")
+
+    def on_recording_finished(self, audio):
+        self.recording_timer.stop()  # Stop the progress timer once recording is done
+
+        self.loaded_audio = np.reshape(audio, (661500,))
+
+        self.text_output.append("Done recording")
+
     def clear_text(self):
         # Clear text from QTextEdit
         self.text_output.clear()
@@ -138,43 +143,13 @@ class AudioProcessingApp(QMainWindow):
             self.text_output.append("Processing...")
 
             # Start processing in a separate thread
-            processing_thread = PredictGenreButton(self.loaded_audio, self.music_classifier)
+            processing_thread = PredictGenreThread(self.loaded_audio, self.music_classifier)
             processing_thread.processing_complete.connect(self.display_result)
             processing_thread.start()
             processing_thread.wait()
 
         else:
             self.text_output.append("No audio is loaded")
-
-    def start_recording(self):
-        self.text_output.append("Recording...")
-        audio, _ = ProccessAudio.record_audio()
-        self.loaded_audio = audio
-        # Save the recorded audio as a temporary WAV file
-
-        self.text_output.append("Done recording")
-
-        # # Start recording asynchronously
-        # self.recording_thread = RecordingThread(self.loaded_audio, self.text_output)
-        # self.recording_thread.text_output = self.text_output  # Pass reference to text output
-        # self.recording_thread.start()
-        #
-        # # Start the progress bar
-        # self.progress_bar.setValue(0)
-        # self.recording_timer.start(300)  # Start timer with interval of 300 milliseconds
-
-        # self.text_output.append("recording...")
-        #
-        # # Start recording logic here
-        # self.progress_bar.setValue(0)  # Reset progress bar
-        # self.recording_timer.start(300)  # Start timer with interval of 1 second (1000 milliseconds)
-        #
-        # # bar_thread = BarProgressThread(self.recording_timer)
-        # # bar_thread.start()
-        # audio = ProccessAudio.record_audio()
-        # self.loaded_audio = audio
-        # self.text_output.append("Done recording")
-        # self.play_audio()
 
     def play_audio(self):
         if self.loaded_audio is not None:
@@ -190,9 +165,10 @@ class AudioProcessingApp(QMainWindow):
             self.stop_recording()
 
     def stop_recording(self):
-        # Stop recording logic here
-        self.recording_timer.stop()
-        # Any other logic to finalize recording
+        # Stop the recording process if it's still running
+        if self.recording_thread.isRunning():
+            self.recording_thread.terminate()
+        self.recording_timer.stop()  # Stop the progress timer
 
 
 if __name__ == "__main__":
