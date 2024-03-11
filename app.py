@@ -6,20 +6,12 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTextEdit, Q
     QProgressBar
 import librosa
 import numpy as np
-import pandas as pd
 import ProccessAudio
-import GlobalVariables
 from MusicClassifierGenerator import MusicClassifierGenerator
-import time
 
-
-class CircularButtonThread(QPushButton):
-    def __init__(self, text="", parent=None):
-        super(CircularButtonThread, self).__init__(text, parent)
-        self.setMinimumSize(64, 64)
-        self.setMaximumSize(64, 64)
-        self.setStyleSheet("border-radius: 32px; background-color: red;")
-        self.setFont(QFont("Arial", 15, QFont.Bold))  # Set font weight to bold
+"""
+**** Threads ****
+"""
 
 
 class RecordThread(QThread):
@@ -45,66 +37,66 @@ class PredictGenreThread(QThread):
         result_text = f"Predicted {y_pred}"
         self.processing_complete.emit(result_text)
 
+
+"""
+*** UI Button ***
+"""
+
+
+class CircularButtonThread(QPushButton):
+    def __init__(self, text="", parent=None):
+        super(CircularButtonThread, self).__init__(text, parent)
+        self.setMinimumSize(64, 64)
+        self.setMaximumSize(64, 64)
+        self.setStyleSheet("border-radius: 32px; background-color: red;")
+        self.setFont(QFont("Arial", 15, QFont.Bold))  # Set font weight to bold
+
+
+"""
+*** App ***
+"""
+
+
 class AudioProcessingApp(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("Audio Processing App")
         self.setGeometry(150, 150, 600, 450)
-
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
         self.layout = QVBoxLayout()
         self.central_widget.setLayout(self.layout)
-
-        self.button_load = QPushButton("Load Audio File")
-        self.button_load.clicked.connect(self.load_audio)
-        self.layout.addWidget(self.button_load)
-
-        self.button_process = QPushButton("Predict genre")
-        self.button_process.clicked.connect(self.predict_genre)
-        self.layout.addWidget(self.button_process)
-
-        self.button_play = QPushButton("Play Audio")
-        self.button_play.clicked.connect(self.play_audio)
-        self.layout.addWidget(self.button_play)
-
-        self.record_button = CircularButtonThread("Record")
-        self.record_button.clicked.connect(self.start_recording)
-        self.layout.addWidget(self.record_button)
-
-        self.progress_bar = QProgressBar()
-        self.layout.addWidget(self.progress_bar)
-
-        self.text_output = QTextEdit()
-        self.layout.addWidget(self.text_output)
-
-        self.button_clear_text = QPushButton("Clear Text")
-        self.button_clear_text.clicked.connect(self.clear_text)
-        self.layout.addWidget(self.button_clear_text)
-
-        self.button_exit = QPushButton("Exit")
-        self.button_exit.clicked.connect(self.close)
-        self.layout.addWidget(self.button_exit)
+        self.init_ui()
 
         self.recording_timer = QTimer()
         self.recording_timer.timeout.connect(self.update_progress)
 
         self.loaded_audio = None
         self.music_classifier = MusicClassifierGenerator(set_default_classifier=True)
-        # self.music_classifier.set_default_classifier()
-
-        # self.progress_thread = ProgressThread(30)  # Duration in seconds
-        # self.progress_thread.progress_update.connect(self.update_progress)
 
         self.recording_thread = RecordThread()
         self.recording_thread.finished.connect(self.on_recording_finished)
         self.recording_timer = QTimer()
         self.recording_timer.timeout.connect(self.update_progress)
+
+    def init_ui(self):
+        self.createButton("Load Audio File", self.load_audio)
+        self.createButton("Predict genre", self.predict_genre)
+        self.createButton("Play Audio", self.play_audio)
+        self.record_button = CircularButtonThread("Record")
+        self.record_button.clicked.connect(self.start_recording)
+        self.layout.addWidget(self.record_button)
+        self.progress_bar = QProgressBar()
+        self.layout.addWidget(self.progress_bar)
+        self.text_output = QTextEdit()
+        self.layout.addWidget(self.text_output)
+        self.createButton("Clear Text", self.clear_text)
+        self.createButton("Exit", self.close)
+
+    def createButton(self, text, function):
+        button = QPushButton(text)
+        button.clicked.connect(function)
+        self.layout.addWidget(button)
 
     def start_recording(self):
         self.progress_bar.setValue(0)  # Reset progress bar
