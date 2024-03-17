@@ -4,6 +4,7 @@ from PyQt5.QtCore import QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTextEdit, QVBoxLayout, QWidget, QFileDialog, \
     QProgressBar
+from PyQt5.QtCore import Qt
 import librosa
 import numpy as np
 
@@ -46,9 +47,9 @@ class PredictGenreThread(QThread):
 """
 
 
-class CircularButtonThread(QPushButton):
+class CircularButton(QPushButton):
     def __init__(self, text="", parent=None):
-        super(CircularButtonThread, self).__init__(text, parent)
+        super(CircularButton, self).__init__(text, parent)
         self.setMinimumSize(64, 64)
         self.setMaximumSize(64, 64)
         self.setStyleSheet("border-radius: 32px; background-color: red;")
@@ -85,14 +86,18 @@ class AudioProcessingApp(QMainWindow):
         self.recording_timer = QTimer()
         self.recording_timer.timeout.connect(self.update_progress)
 
+
+
     def init_ui(self):
         # Initialize UI elements
         self.create_button("Load Audio File", self.load_audio)
         self.create_button("Predict genre", self.predict_genre)
         self.create_button("Play Audio", self.play_audio)
-        self.record_button = CircularButtonThread("Record")
+        self.record_button = CircularButton("Record", self)
         self.record_button.clicked.connect(self.start_recording)
-        self.layout.addWidget(self.record_button)
+
+
+        self.layout.addWidget(self.record_button, alignment=Qt.AlignCenter)
         self.progress_bar = QProgressBar()
         self.layout.addWidget(self.progress_bar)
         self.text_output = QTextEdit()
@@ -128,7 +133,7 @@ class AudioProcessingApp(QMainWindow):
         self.text_output.append("Loading..")
         filename, _ = QFileDialog.getOpenFileName(self, "Open Audio File", "", "Audio Files (*.wav *.mp3)")
         if filename:
-            self.loaded_audio, _ = librosa.load(filename, sr=None)
+            self.loaded_audio, _ = librosa.load(filename, sr=GlobalVariables.SAMPLING_RATE)
             self.loaded_audio = ProccessAudio.extract_middle(self.loaded_audio)
         # check if the duration of the track is >30sc
         self.text_output.append("Audio is Loaded")
