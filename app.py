@@ -78,15 +78,11 @@ class AudioProcessingApp(QMainWindow):
 
         # Audio and trained model
         self.loaded_audio = None
-        self.music_classifier = MusicClassifierGenerator(set_default_classifier=True)
+        self.music_classifier = MusicClassifierGenerator(train_default_classifier=True)
 
         # Thread for recording audio
         self.recording_thread = RecordThread()
         self.recording_thread.finished.connect(self.on_recording_finished)
-        self.recording_timer = QTimer()
-        self.recording_timer.timeout.connect(self.update_progress)
-
-
 
     def init_ui(self):
         # Initialize UI elements
@@ -95,7 +91,6 @@ class AudioProcessingApp(QMainWindow):
         self.create_button("Play Audio", self.play_audio)
         self.record_button = CircularButton("Record", self)
         self.record_button.clicked.connect(self.start_recording)
-
 
         self.layout.addWidget(self.record_button, alignment=Qt.AlignCenter)
         self.progress_bar = QProgressBar()
@@ -113,14 +108,14 @@ class AudioProcessingApp(QMainWindow):
 
     def start_recording(self):
         self.progress_bar.setValue(0)  # Reset progress bar
-        self.recording_timer.start(GlobalVariables.DURATION * 10)  # Start the timer to update progress bar every second
+        self.recording_timer.start(GlobalVariables.TRACK_DURATION * 10)  # Start the timer to update progress bar every second
         self.recording_thread.start()
         self.text_output.append("Recording..")
 
     def on_recording_finished(self, audio):
         self.recording_timer.stop()  # Stop the progress timer once recording is done
 
-        self.loaded_audio = np.reshape(audio, (GlobalVariables.DURATION*GlobalVariables.SAMPLING_RATE,))
+        self.loaded_audio = np.reshape(audio, (GlobalVariables.TRACK_DURATION * GlobalVariables.SAMPLING_RATE,))
 
         self.text_output.append("Done recording")
 

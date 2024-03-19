@@ -40,7 +40,7 @@ svm_param_grid = {
 # }
 
 class MusicClassifierGenerator:
-    def __init__(self, set_default_classifier=False):
+    def __init__(self, train_default_classifier=False):
         self.file_suffix = None
         self.param_grid = None
         self.pipeline = None
@@ -54,7 +54,7 @@ class MusicClassifierGenerator:
         self.sorted_file_names_column = None
         self.X = None
         self.data = Data(GlobalVariables.dataset_path)
-        if set_default_classifier:
+        if train_default_classifier:
             self.set_default_classifier()
 
     def set_features_params(self, max_feature_num: int, pairwise_correlation_thresholds: float):

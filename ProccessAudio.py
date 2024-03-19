@@ -10,7 +10,7 @@ def play_audio(audio):
     sd.wait()
 
 
-def record_audio():
+def record_audio(record_time_sec=GlobalVariables.TRACK_DURATION, sampling_rate=GlobalVariables.SAMPLING_RATE):
     """
     Function to record audio using the sounddevice library.
 
@@ -30,7 +30,7 @@ def record_audio():
         raise ValueError("No input devices found.")
 
     # Record audio for a specific duration at a given sample rate and number of channels
-    audio = sd.rec(int(GlobalVariables.SAMPLING_RATE * GlobalVariables.DURATION),
+    audio = sd.rec(int(sampling_rate * record_time_sec),
                    samplerate=GlobalVariables.SAMPLING_RATE, channels=device['max_input_channels'],
                    dtype='float32', device=input_device_id)
 
@@ -47,7 +47,7 @@ def record_audio():
     return audio, sampling_rate
 
 
-def extract_middle(y, sr=GlobalVariables.SAMPLING_RATE, duration=GlobalVariables.DURATION):
+def extract_middle(y, sr=GlobalVariables.SAMPLING_RATE, duration=GlobalVariables.TRACK_DURATION):
     """
     Extracts the middle segment of an audio signal.
 

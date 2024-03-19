@@ -25,4 +25,4 @@ selected_genre = [
 # LABEL = 'rock'            # Genre label for the audio files
 SAMPLING_RATE = 22050     # Audio sampling rate (samples/second)
 MAX_AUDIO_FILES = 300     # Maximum number of audio files to process
-DURATION = 30             # Duration for middle segment extraction (in seconds)
+TRACK_DURATION = 30             # Duration for middle segment extraction (in seconds)
