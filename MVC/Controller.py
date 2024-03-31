@@ -4,8 +4,8 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
 import GlobalVariables
-from MvcView import View
-from MvcModel import Model
+from MVC.View import View
+from MVC.Model import Model
 
 """ Threads """
 
