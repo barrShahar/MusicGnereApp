@@ -2,7 +2,7 @@
 
 # Flag to control plotting
 g_plot = False
-dataset_path = "./csv/data3.csv"
+dataset_path = "extracted_features_csv/data3.csv"
 
 gtzan_genres = [
     "blues", "classical", "country", "disco", "hiphop",
