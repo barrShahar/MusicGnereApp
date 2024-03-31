@@ -3,7 +3,7 @@
 * This is the initial readme.md file; currently working on it.
 
 
-Trained machine learning models with SVM (93%), KNN (92%), Adaboost (85%), and Perceptron (87%) on manual time and spectrum features. Developed an MVC-based GUI application for user-friendly interaction.!
+Trained machine learning models with SVM (93%), KNN (92%), Adaboost (85%), and Perceptron (87%) on manual time and spectrum features. Developed an MVC-based GUI application for user-friendly interaction.
 
 MVC Application User-End:
   
